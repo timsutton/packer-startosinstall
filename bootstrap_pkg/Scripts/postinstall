@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# TODO: put a -eu back in here probably
+set -o pipefail
+
+USER=vagrant
+OSX_VERS=$(sw_vers -productVersion | awk -F "." '{print $2}')
+PlistBuddy="/usr/libexec/PlistBuddy"
+
+# Create vagrant user
+sysadminctl -addUser $USER -password vagrant -admin
+
+# Enable SSH
+# OVERRIDES_PLIST="$3/private/var/db/com.apple.xpc.launchd/disabled.plist"
+# $PlistBuddy -c 'Delete :com.openssh.sshd' "$OVERRIDES_PLIST"
+# $PlistBuddy -c 'Add :com.openssh.sshd bool False' "$OVERRIDES_PLIST"
+
+# Add user to sudoers
+cp "$3/etc/sudoers" "$3/etc/sudoers.orig"
+echo "$USER ALL=(ALL) NOPASSWD: ALL" >> "$3/etc/sudoers"
+
+# Suppress prompts for things relevant to at least macOS VMs
+# TODO: these seem to create the files in the dirs, but they don't have the desired effect, so
+#       maybe this isn't in the right place anymore. on my Mac this domain has a lot more in it after a runthrough
+# $PlistBuddy -c 'Add :DidSeeCloudSetup bool true' "$3/Users/$USER/Library/Preferences/com.apple.SetupAssistant.plist"
+# $PlistBuddy -c 'Add :LastSeenCloudProductVersion string 10.'"$OSX_VERS" "$3/Users/$USER/Library/Preferences/com.apple.SetupAssistant.plist"
+# $PlistBuddy -c 'Add :DidSeeSiriSetup bool true' "$3/Users/$USER/Library/Preferences/com.apple.SetupAssistant.plist"
+# $PlistBuddy -c 'Add :DidSeePrivacy bool true' "$3/Users/$USER/Library/Preferences/com.apple.SetupAssistant.plist"
+# $PlistBuddy -c 'Add :DidSeeAppearanceSetup bool true' "$3/Users/$USER/Library/Preferences/com.apple.SetupAssistant.plist"
+
+# sudo -u vagrant defaults write com.apple.SetupAssistant DidSeeCloudSetup -bool true
+# # TODO: make that version dynamic
+# sudo -u vagrant defaults write com.apple.SetupAssistant LastSeenCloudProductVersion -string '10.15' 
+# sudo -u vagrant defaults write com.apple.SetupAssistant DidSeeSiriSetup -bool true
+# sudo -u vagrant defaults write com.apple.SetupAssistant DidSeePrivacy -bool true
+# sudo -u vagrant defaults write com.apple.SetupAssistant DidSeeAppearanceSetup -bool true
+
+# Fix ownership now that the above has made a Library folder as root
+# chown -R ${USER}:20 "$3/Users/$USER"
+
+# Disable loginwindow screensaver to save CPU cycles
+# $PlistBuddy -c 'Add :loginWindowIdleTime integer 0' "$3/Library/Preferences/com.apple.screensaver.plist"
+
+# Disable the welcome screen
+touch "$3/private/var/db/.AppleSetupDone"
+
+# Enable SSH
+/bin/launchctl load -w /System/Library/LaunchDaemons/ssh.plist
