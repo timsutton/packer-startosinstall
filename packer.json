@@ -1,0 +1,68 @@
+{
+  "builders": [
+    {
+      "boot_wait": "3m",
+      "boot_key_interval": "40ms",
+      "boot_command": [
+        "<tab><wait5><spacebar>",
+        "<wait10s>",
+        "<leftCtrlOn><f2><leftCtrlOff>",
+        "<right><right><right><right>",
+        "<down><down><down><down>",
+        "<enter>",
+        "<wait5s>",
+        "diskutil eraseDisk JHFS+ 'Macintosh HD' disk0<enter>",
+        "<wait5s>",
+        "csrutil {{user `sip_status`}}<enter>",
+        "curl -o /tmp/bootstrap.pkg http://{{ .HTTPIP }}:{{ .HTTPPort }}/vm-bootstrap.pkg<enter>",
+        "'/Volumes/Image Volume/Install macOS'*'.app/Contents/Resources/startosinstall' --agreetolicense --volume '/Volumes/Macintosh HD' --installpackage /tmp/bootstrap.pkg<enter>",
+        "<wait5m>",
+        "<leftCtrlOn><leftShiftOn><leftAltOn><leftSuperOn>w<leftCtrlOff><leftShiftOff><leftAltOff><leftSuperOff>"
+      ],
+      "communicator": "ssh",
+      "cores": 2,
+      "cpus": 2,
+      "disk_adapter_type": "sata",
+      "disk_size": 40960,
+      "guest_os_type": "darwin19-64",
+      "http_directory": "httpd",
+      "iso_checksum_type": "none",
+      "iso_url": "{{user `iso_url`}}",
+      "memory": 8192,
+      "ssh_username": "vagrant",
+      "ssh_password": "vagrant",
+      "ssh_timeout": "45m",
+      "tools_upload_flavor": "darwin",
+      "tools_upload_path": "/tmp/{{.Flavor}}.iso",
+      "type": "vmware-iso",
+      "usb": "true",
+      "vmx_template_path": "vmx.gotmpl"
+    }
+  ],
+  "min_packer_version": "1.4.5",
+  "post-processors": [],
+  "provisioners": [
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/guest-tools.sh"
+      ]
+    },
+    {
+      "type": "shell",
+      "expect_disconnect": true,
+      "inline": [
+        "sudo reboot"
+      ]
+    },
+    {
+      "type": "shell-local",
+      "command": "sleep {{user `provisioning_delay`}}"
+    }
+  ],
+  "variables": {
+    "iso_url": "installer.vmdk",
+    "provisioning_delay": "3600",
+    "sip_status": "disable"
+  }
+}
