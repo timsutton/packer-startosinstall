@@ -1,7 +1,7 @@
 output-vmware-iso
 packer_cache
 .DS_Store
-.vs_code
+.vscode
 httpd
 .python-version
 *.lck
