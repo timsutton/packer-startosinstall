@@ -32,6 +32,7 @@ You may want to set the `PACKER_LOG=info` or `PACKER_LOG=debug` environment vari
 
 ## TODO
 
+* Fix the issue where we currently need to manually hack the installer path in `vmx.gotmpl` (see `sata0:1.fileName`)
 * Add back a configuration profile or other means to disable Setup Assistant things, auto-login, and other updated items from [osx-vm-templates](https://github.com/timsutton/osx-vm-templates/), etc.
 * Explain more about how this works
 * Document why we use a .gotmpl for the VMX configuration, why packer's existing VMX configuration options weren't sufficient.
