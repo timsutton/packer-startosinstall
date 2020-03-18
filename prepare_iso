@@ -1,0 +1,57 @@
+#!/usr/bin/env python
+
+import argparse
+import os
+import subprocess
+
+
+class FailedValidationChecksError(Exception):
+    pass
+
+
+class PrepareInstallerSession:
+    def __init__(self, input_app_path, output_vmdk_path, create_install_tool_path):
+        self.input = input_app_path
+        self.output = output_vmdk_path
+        self.create_installer_tool_path = create_install_tool_path
+
+    def _preflight(self):
+        if not os.path.exists(self.create_installer_tool_path):
+            raise FailedValidationChecksError(
+                "Failed to locate VMware Fusion's helper tool '%s', which is required "
+                "for creating the initial installer VMDK. Please ensure you have VMware z"
+                "Fusion installed at its default path."
+            )
+
+    def run(self):
+        self._preflight()
+        self._run_create_vmdk_tool(self.input, self.output)
+
+    def _run_create_vmdk_tool(self, source_app, target_vmdk_path):
+        cmd = [self.create_installer_tool_path, source_app, target_vmdk_path]
+        subprocess.call(cmd)
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Prepare an automated macOS VM build")
+    parser.add_argument("source_app", help="Path to a macOS installer app")
+    parser.add_argument("dest_vmdk", help="Path to the output VMDK file")
+    parser.add_argument(
+        "--create-installer-script-path",
+        default="/Applications/VMware Fusion.app/Contents/Library/Create Mavericks Installer.tool",
+        help="Path an alternate version of VMware's installer creation "
+        "script. Useful for testing modifications to the script "
+        "or in case VMware's is broken for a new macOS release.",
+    )
+
+    args = parser.parse_args()
+    create_installer_script_path = os.path.realpath(args.create_installer_script_path)
+    session = PrepareInstallerSession(
+        args.source_app, args.dest_vmdk, create_installer_script_path
+    )
+
+    session.run()
+
+
+if __name__ == "__main__":
+    main()
