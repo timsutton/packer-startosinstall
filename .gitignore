@@ -1,0 +1,9 @@
+output-vmware-iso
+packer_cache
+.DS_Store
+.vs_code
+httpd
+.python-version
+*.lck
+*.dmg
+*.vmdk
