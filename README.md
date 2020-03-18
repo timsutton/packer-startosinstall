@@ -32,5 +32,6 @@ You may want to set the `PACKER_LOG=info` or `PACKER_LOG=debug` environment vari
 
 ## TODO
 
+* Add back a configuration profile or other means to disable Setup Assistant things, auto-login, and other updated items from [osx-vm-templates](https://github.com/timsutton/osx-vm-templates/), etc.
 * Explain more about how this works
 * Document why we use a .gotmpl for the VMX configuration, why packer's existing VMX configuration options weren't sufficient.
