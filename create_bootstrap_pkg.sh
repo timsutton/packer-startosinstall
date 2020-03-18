@@ -30,4 +30,5 @@ rm -f "${component_file}"
 popd
 
 # staging this to packer's directory
+rm -rf httpd && mkdir -p httpd
 cp -v "bootstrap_pkg/${dist_file}" httpd/
